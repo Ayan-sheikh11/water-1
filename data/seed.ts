@@ -1,0 +1,48 @@
+import { Product } from "@/lib/types";
+export const products: Product[] = [
+  {
+    id: "p1",
+    name: "PureFlow Mineral Water",
+    size: "500ml",
+    price: 70,
+    cost: 40,
+    stock: 70,
+    offerQty: 6,
+    offerPrice: 390,
+    lowStock: 10,
+    image: "💧",
+  },
+  {
+    id: "p2",
+    name: "PureFlow Premium",
+    size: "1.5L",
+    price: 120,
+    cost: 75,
+    stock: 42,
+    offerQty: 6,
+    offerPrice: 660,
+    lowStock: 8,
+    image: "🫧",
+  },
+  {
+    id: "p3",
+    name: "Family Pack",
+    size: "12 × 500ml",
+    price: 780,
+    cost: 480,
+    stock: 18,
+    offerQty: 2,
+    offerPrice: 1450,
+    lowStock: 4,
+    image: "📦",
+  },
+];
+export const zones = {
+  Clifton: 80,
+  DHA: 100,
+  Gulshan: 90,
+  Gulberg: 90,
+  NorthNazimabad: 100,
+  PECHS: 70,
+  Other: 120,
+};

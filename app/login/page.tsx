@@ -1,0 +1,9 @@
+import React, { Suspense } from "react";
+import { LoginPage } from "@/components/pages/LoginPage";
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPage />
+    </Suspense>
+  );
+}
