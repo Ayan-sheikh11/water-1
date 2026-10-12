@@ -1,4 +1,4 @@
-// File: C:\Users\ADVANCES  PC\Desktop\New folder (2)\pureflow-nextjs\app\admin\login\page.tsx
+// File: C:\Users\HAFIZ WAQAS\Desktop\water\app\admin\login\page.tsx
 import * as entry from '../../../../../app/admin/login/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

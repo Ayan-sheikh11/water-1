@@ -24,15 +24,16 @@ export function CheckoutPage() {
   });
 
   useEffect(() => {
-    // protect checkout: require session
     if (!session) {
       router.push("/login?returnTo=/checkout");
       return;
     }
-    // load saved profile from localStorage users
+
     try {
-      const u = JSON.parse(localStorage.getItem("pf_users") || "[]");
-      const me = u.find((x: any) => x.email === session.email);
+      const rawUsers = JSON.parse(localStorage.getItem("pf_users") || "[]");
+      const me = rawUsers.find(
+        (x: any) => String(x.email || "").trim().toLowerCase() === session.email.trim().toLowerCase(),
+      );
       if (me)
         setF({
           name: me.name || "",
@@ -40,7 +41,9 @@ export function CheckoutPage() {
           address: me.address || "",
           zone: me.zone || "Clifton",
         });
-    } catch {}
+    } catch (error) {
+      console.error("Failed to read checkout profile from localStorage", error);
+    }
   }, [session, router]);
   const items = cart.map((i) => ({
     ...i,
@@ -48,16 +51,29 @@ export function CheckoutPage() {
   }));
   const sub = items.reduce((s, i) => s + i.qty * i.p.price, 0),
     delivery = zones[f.zone as keyof typeof zones] || 120;
-  const submit = (e: any) => {
+  const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!session) return toast("Please sign in to place order");
     if (!items.length) return toast("Cart is empty");
-    if (!f.name || !f.phone || !f.address)
+
+    const cleanedName = f.name.trim();
+    const cleanedPhone = f.phone.trim();
+    const cleanedAddress = f.address.trim();
+
+    if (!cleanedName || !cleanedPhone || !cleanedAddress)
       return toast("Complete delivery details");
+
     const id = "PF-" + Math.floor(100000 + Math.random() * 900000);
     const o = {
       id,
-      customer: { ...f, email: session.email, id: session.email },
+      customer: {
+        ...f,
+        name: cleanedName,
+        phone: cleanedPhone,
+        address: cleanedAddress,
+        email: session.email,
+        id: session.email,
+      },
       items: items.map((i) => ({
         productId: i.p.id,
         name: i.p.name,
@@ -73,15 +89,14 @@ export function CheckoutPage() {
     };
     setOrders([o, ...orders]);
     setCart([]);
-    // persist profile to users
-    try {
-      updateProfile(session.email, {
-        name: f.name,
-        phone: f.phone,
-        address: f.address,
-        zone: f.zone,
-      });
-    } catch {}
+
+    updateProfile(session.email, {
+      name: cleanedName,
+      phone: cleanedPhone,
+      address: cleanedAddress,
+      zone: f.zone,
+    });
+
     router.push("/track-order?order=" + id);
     toast("Order placed successfully");
   };

@@ -240,7 +240,7 @@ nav a:hover {
 .pageTitle {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-end;
   margin-bottom: 25px;
 }
 .section h2,
@@ -636,7 +636,7 @@ nav a:hover {
 .adminTop {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: flex-start;
   margin-bottom: 25px;
 }
 .adminTop h1 {
@@ -673,7 +673,7 @@ nav a:hover {
   height: 260px;
   display: flex;
   gap: 15px;
-  align-items: end;
+  align-items: flex-end;
   padding: 20px;
   border-bottom: 1px solid #dfeaf3;
 }

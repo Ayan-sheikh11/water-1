@@ -15,27 +15,46 @@ export function AccountProfile() {
   });
 
   useEffect(() => {
-    if (!session) return router.replace("/login?returnTo=/account/profile");
+    if (!session) {
+      router.replace("/login?returnTo=/account/profile");
+      return;
+    }
+
     try {
-      const u = JSON.parse(localStorage.getItem("pf_users") || "[]");
-      const me = u.find((x: any) => x.email === session.email);
-      if (me)
+      const rawUsers = JSON.parse(localStorage.getItem("pf_users") || "[]");
+      const me = rawUsers.find(
+        (x: any) => String(x.email || "").trim().toLowerCase() === session.email.trim().toLowerCase(),
+      );
+      if (me) {
         setF({
           name: me.name || "",
           phone: me.phone || "",
           address: me.address || "",
           zone: me.zone || "Clifton",
         });
-    } catch {}
+      }
+    } catch (error) {
+      console.error("Failed to read profile from localStorage", error);
+    }
   }, [session, router]);
 
-  const save = (e: any) => {
+  const save = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!session) return toast("Please sign in");
+
+    const trimmedName = f.name.trim();
+    const trimmedPhone = f.phone.trim();
+    const trimmedAddress = f.address.trim();
+
+    if (!trimmedName || !trimmedPhone || !trimmedAddress) {
+      toast("Please complete all profile fields");
+      return;
+    }
+
     updateProfile(session.email, {
-      name: f.name,
-      phone: f.phone,
-      address: f.address,
+      name: trimmedName,
+      phone: trimmedPhone,
+      address: trimmedAddress,
       zone: f.zone,
     });
     toast("Profile saved");

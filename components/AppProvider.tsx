@@ -17,6 +17,8 @@ type User = {
   address?: string;
   passwordHash: string;
 };
+
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
 type Ctx = {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -71,8 +73,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setProducts(g("pf_products", seed));
       setCart(g("pf_cart", []));
       setOrders(g("pf_orders", []));
-      setSessionState(g("pf_session", null));
-      setUsers(g("pf_users", []));
+      const savedSession = g("pf_session", null);
+      setSessionState(savedSession && typeof savedSession === "object" ? savedSession : null);
+      setUsers(g("pf_users", []).map((user: Partial<User>) => ({
+        id: user.id || user.email || "",
+        email: normalizeEmail(String(user.email || "")),
+        name: user.name || "Customer",
+        phone: user.phone || "",
+        zone: user.zone || "Clifton",
+        address: user.address || "",
+        passwordHash: user.passwordHash || "",
+      })));
     } catch {}
   }, []);
 
@@ -112,33 +123,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     phone?: string;
     passwordHash: string;
   }) => {
-    if (users.find((x) => x.email === u.email))
+    const normalizedEmail = normalizeEmail(u.email);
+    if (users.some((x) => normalizeEmail(x.email) === normalizedEmail))
       return { success: false, message: "Email already registered" };
     const newUser: User = {
-      id: u.email,
-      email: u.email,
+      id: normalizedEmail,
+      email: normalizedEmail,
       name: u.name,
       phone: u.phone || "",
+      zone: "Clifton",
+      address: "",
       passwordHash: u.passwordHash,
     };
-    setUsers([newUser, ...users]);
+    setUsers((prev) => [newUser, ...prev]);
     return { success: true };
   };
 
   const loginUser = (email: string, passwordHash: string) => {
+    const normalizedEmail = normalizeEmail(email);
     const user = users.find(
-      (u) => u.email === email && u.passwordHash === passwordHash,
+      (u) => normalizeEmail(u.email) === normalizedEmail && u.passwordHash === passwordHash,
     );
     if (!user) return { success: false };
     return { success: true, user };
   };
 
   const updateProfile = (email: string, data: Partial<User>) => {
+    const normalizedEmail = normalizeEmail(email);
     setUsers((prev) =>
-      prev.map((u) => (u.email === email ? { ...u, ...data } : u)),
+      prev.map((u) =>
+        normalizeEmail(u.email) === normalizedEmail
+          ? { ...u, ...data, email: normalizedEmail, id: normalizedEmail }
+          : u,
+      ),
     );
-    // if updating current session name/profile, reflect in session
-    if (session?.email === email)
+    if (session?.email === normalizedEmail)
       setSession({ ...session, name: data.name || session.name });
   };
 
